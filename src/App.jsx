@@ -22,6 +22,10 @@ const Edit2 = (props) => <IconBase {...props}><path d="M17 3a2.828 2.828 0 1 1 4
 const Save = (props) => <IconBase {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></IconBase>;
 const Trash2 = (props) => <IconBase {...props}><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></IconBase>;
 const Plus = (props) => <IconBase {...props}><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></IconBase>;
+const Download = (props) => <IconBase {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></IconBase>;
+const Upload = (props) => <IconBase {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></IconBase>;
+const Database = (props) => <IconBase {...props}><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5" /><path d="M3 12A9 3 0 0 0 21 12" /></IconBase>;
+const Copy = (props) => <IconBase {...props}><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></IconBase>;
 
 // --- 預設值 ---
 const DEFAULT_VALUES = {
@@ -409,6 +413,65 @@ const App = () => {
   const [isEditingPearls, setIsEditingPearls] = useState(false);
   const [editedPearls, setEditedPearls] = useState([]);
 
+  // --- 永續資料匯出/匯入 ---
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [dataModalTab, setDataModalTab] = useState('export'); // 'export' | 'import'
+
+  const handleExportJSON = () => {
+    try {
+      const dataStr = JSON.stringify(drugs, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sanford_renal_guide_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('匯出失敗：' + error.message);
+    }
+  };
+
+  const handleCopyJSON = () => {
+    try {
+      const dataStr = JSON.stringify(drugs, null, 2);
+      navigator.clipboard.writeText(dataStr).then(() => {
+        alert('已複製到剪貼簿！');
+      });
+    } catch (error) {
+      alert('複製失敗：' + error.message);
+    }
+  };
+
+  const handleImportJSON = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        if (Array.isArray(importedData)) {
+          if (confirm('匯入將會「完全覆蓋」您目前在瀏覽器上的客製化備註。確定要繼續嗎？')) {
+            setDrugs(importedData);
+            // 立即生效
+            localStorage.setItem('renal_guide_drugs', JSON.stringify(importedData));
+            alert('匯入成功！資料已更新。');
+            setIsDataModalOpen(false);
+            window.location.reload(); // 重新整理以確保所有狀態同步
+          }
+        } else {
+          alert('格式錯誤：必須是藥物資料陣列 (.json)。');
+        }
+      } catch (err) {
+        alert('解析失敗：請確保檔案是正確的 JSON 格式。');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // 更新已選取藥物的參考（若資料庫更新了）
   const currentDrug = useMemo(() => {
     if (!selectedDrug) return null;
@@ -668,7 +731,14 @@ const App = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsDataModalOpen(true)}
+              className="flex items-center gap-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-xl transition-all border border-white/5 shadow-sm"
+              title="資料備份與還原 (.json)"
+            >
+              <Database className="w-4 h-4" /> 備份
+            </button>
             <button
               onClick={handleReset}
               className="flex items-center gap-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-xl transition-all border border-white/5 shadow-sm"
@@ -984,6 +1054,96 @@ const App = () => {
           </div>
         </section>
       </main>
+
+      {/* 資料管理互動視窗 (Export/Import Modal) */}
+      {isDataModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsDataModalOpen(false)}></div>
+          <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            {/* Tabs Header */}
+            <div className="flex border-b border-slate-100">
+              <button
+                onClick={() => setDataModalTab('export')}
+                className={`flex-1 py-5 text-sm font-black tracking-widest uppercase transition-all ${dataModalTab === 'export' ? 'text-indigo-600 border-b-4 border-indigo-600 bg-indigo-50/30' : 'text-slate-400 hover:bg-slate-50'}`}
+              >
+                匯出資料 (EXPORT)
+              </button>
+              <button
+                onClick={() => setDataModalTab('import')}
+                className={`flex-1 py-5 text-sm font-black tracking-widest uppercase transition-all ${dataModalTab === 'import' ? 'text-indigo-600 border-b-4 border-indigo-600 bg-indigo-50/30' : 'text-slate-400 hover:bg-slate-50'}`}
+              >
+                匯入資料 (IMPORT)
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-10 space-y-8">
+              {dataModalTab === 'export' ? (
+                <div className="space-y-6">
+                  <div className="bg-indigo-50/50 p-6 rounded-[1.5rem] border border-indigo-100/50 space-y-3">
+                    <h5 className="text-sm font-black text-indigo-700 flex items-center gap-2">
+                      💡 傳送方式選擇
+                    </h5>
+                    <ol className="text-sm text-indigo-900/70 space-y-2 list-decimal list-inside font-medium leading-relaxed">
+                      <li><strong className="text-indigo-600">推薦：</strong> 下載備份檔 (.json)</li>
+                      <li>複製文字並傳送至其他裝置</li>
+                    </ol>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <button
+                      onClick={handleExportJSON}
+                      className="w-full bg-[#10b981] hover:bg-[#059669] text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.98]"
+                    >
+                      <Download className="w-6 h-6" /> 下載備份檔案 (.json)
+                    </button>
+                    <button
+                      onClick={handleCopyJSON}
+                      className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                    >
+                      <Copy className="w-4 h-4" /> 複製資料代碼
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="bg-orange-50 p-6 rounded-[1.5rem] border border-orange-100 space-y-3">
+                    <h5 className="text-sm font-black text-orange-700 flex items-center gap-2">
+                      ⚠️ 注意事項
+                    </h5>
+                    <p className="text-sm text-orange-900/70 font-medium leading-relaxed">
+                      匯入將會 <strong className="text-orange-700 border-b-2 border-orange-300">完全覆蓋</strong> 您目前裝置上的現有資料。請確認您已備份重要內容。
+                    </p>
+                  </div>
+
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportJSON}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="w-full border-2 border-dashed border-emerald-500/30 group-hover:border-emerald-500/60 transition-all rounded-[1.5rem] py-8 flex flex-col items-center justify-center gap-3 bg-emerald-50/30 group-hover:bg-emerald-50/50">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <span className="text-emerald-700 font-bold">選擇備份檔案 (.json)</span>
+                      <span className="text-[10px] text-emerald-600/60 uppercase tracking-widest font-black">點擊或拖放檔案至此</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => setIsDataModalOpen(false)}
+                className="w-full py-2 text-slate-400 hover:text-slate-600 text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+              >
+                關閉視窗 <X className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
