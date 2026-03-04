@@ -18,6 +18,10 @@ const X = (props) => <IconBase {...props}><path d="M18 6 6 18" /><path d="m6 6 1
 const Activity = (props) => <IconBase {...props}><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></IconBase>;
 const Waves = (props) => <IconBase {...props}><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" /><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" /><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" /></IconBase>;
 const BookOpen = (props) => <IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></IconBase>;
+const Edit2 = (props) => <IconBase {...props}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></IconBase>;
+const Save = (props) => <IconBase {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></IconBase>;
+const Trash2 = (props) => <IconBase {...props}><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></IconBase>;
+const Plus = (props) => <IconBase {...props}><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></IconBase>;
 
 // --- 預設值 ---
 const DEFAULT_VALUES = {
@@ -392,6 +396,78 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState(DEFAULT_VALUES.searchTerm);
   const [selectedDrug, setSelectedDrug] = useState(null);
 
+  // --- 永續儲存與編輯狀態 ---
+  const [drugs, setDrugs] = useState(() => {
+    const saved = localStorage.getItem('renal_guide_drugs');
+    return saved ? JSON.parse(saved) : DRUG_DATA;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('renal_guide_drugs', JSON.stringify(drugs));
+  }, [drugs]);
+
+  const [isEditingPearls, setIsEditingPearls] = useState(false);
+  const [editedPearls, setEditedPearls] = useState([]);
+
+  // 更新已選取藥物的參考（若資料庫更新了）
+  const currentDrug = useMemo(() => {
+    if (!selectedDrug) return null;
+    return drugs.find(d => d.id === selectedDrug.id);
+  }, [drugs, selectedDrug]);
+
+  const handleStartEdit = () => {
+    if (!currentDrug) return;
+    const pearls = isHD ? [...(currentDrug.hdPearls || [])] : [...(currentDrug.standardPearls || [])];
+    setEditedPearls(pearls);
+    setIsEditingPearls(true);
+  };
+
+  const handleSavePearls = () => {
+    if (!currentDrug) return;
+    const cleanPearls = editedPearls.filter(p => p.trim() !== '');
+    const updatedDrugs = drugs.map(d => {
+      if (d.id === currentDrug.id) {
+        const updated = isHD
+          ? { ...d, hdPearls: cleanPearls }
+          : { ...d, standardPearls: cleanPearls };
+        return updated;
+      }
+      return d;
+    });
+
+    // 立即存入 localStorage 確保持久化，不只依賴 useEffect
+    localStorage.setItem('renal_guide_drugs', JSON.stringify(updatedDrugs));
+    setDrugs(updatedDrugs);
+
+    // 如果目前有選取該藥物，同步更新 selectedDrug 參考
+    const updatedDrugMatch = updatedDrugs.find(d => d.id === currentDrug.id);
+    if (updatedDrugMatch) setSelectedDrug(updatedDrugMatch);
+
+    setIsEditingPearls(false);
+  };
+
+  const handleRestoreOriginal = () => {
+    if (!currentDrug) return;
+    const originalVersion = DRUG_DATA.find(d => d.id === currentDrug.id);
+    if (originalVersion) {
+      setEditedPearls(isHD ? [...(originalVersion.hdPearls || [])] : [...(originalVersion.standardPearls || [])]);
+    }
+  };
+
+  const handleAddPearl = () => {
+    setEditedPearls([...editedPearls, '']);
+  };
+
+  const handleUpdatePearl = (index, value) => {
+    const newPearls = [...editedPearls];
+    newPearls[index] = value;
+    setEditedPearls(newPearls);
+  };
+
+  const handleRemovePearl = (index) => {
+    setEditedPearls(editedPearls.filter((_, i) => i !== index));
+  };
+
   const handleReset = () => {
     setAge(DEFAULT_VALUES.age);
     setWeight(DEFAULT_VALUES.weight);
@@ -427,17 +503,15 @@ const App = () => {
   }, [age, weight, height, scr, gender]);
 
   const filteredDrugs = useMemo(() => {
-    return DRUG_DATA.filter(drug =>
+    return drugs.filter(drug =>
       drug.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       drug.category.toLowerCase().includes(searchTerm.toLowerCase())
     ).sort((a, b) => a.name.localeCompare(b.name));
-  }, [searchTerm]);
+  }, [searchTerm, drugs]);
 
   const activePearls = useMemo(() => {
     const pearls = [];
-    // 只有在「已選取特定藥物」或「搜尋結果只有一個」的情況下，才顯示專屬珠璣 (Pearl)
-    // 避免搜尋 broad term (如 "Cef") 時顯示過多不相干的備註
-    const sourceDrugs = selectedDrug ? [selectedDrug] : (filteredDrugs.length === 1 ? filteredDrugs : []);
+    const sourceDrugs = currentDrug ? [currentDrug] : (filteredDrugs.length === 1 ? filteredDrugs : []);
 
     sourceDrugs.forEach(d => {
       if (isHD) {
@@ -447,7 +521,7 @@ const App = () => {
       }
     });
     return [...new Set(pearls)];
-  }, [selectedDrug, filteredDrugs, isHD]);
+  }, [currentDrug, filteredDrugs, isHD]);
 
   const getDoseAdvice = (drug) => {
     if (isHD) {
@@ -598,8 +672,21 @@ const App = () => {
             <button
               onClick={handleReset}
               className="flex items-center gap-2 text-xs font-bold text-white bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-xl transition-all border border-white/5 shadow-sm"
+              title="重置計算與搜尋"
             >
               <RotateCcw className="w-4 h-4" /> 重置
+            </button>
+            <button
+              onClick={() => {
+                if (confirm('確定要清除所有自定義備註並恢復為原廠設定嗎？')) {
+                  localStorage.removeItem('renal_guide_drugs');
+                  window.location.reload();
+                }
+              }}
+              className="flex items-center gap-2 text-xs font-bold text-white bg-red-600/20 hover:bg-red-600/40 px-3 py-2.5 rounded-xl transition-all border border-red-500/30 shadow-sm opacity-80 hover:opacity-100"
+              title="恢復出廠設定"
+            >
+              <Trash2 className="w-4 h-4 text-red-200" />
             </button>
             <div className={`${isHD ? 'bg-red-600 text-white shadow-red-900/50' : 'bg-[#5c5cdd] text-white shadow-indigo-900/50'} px-5 py-2.5 rounded-2xl shadow-lg transition-all duration-300 min-w-[140px] flex flex-col items-center justify-center`}>
               <div className="text-[9px] font-black uppercase tracking-wider opacity-80 mb-0.5">{isHD ? 'Dialysis Patient' : 'CrCl Result'}</div>
@@ -675,7 +762,7 @@ const App = () => {
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-6 h-6 transition-colors group-focus-within:text-indigo-500" strokeWidth={2.5} />
           <input
             type="text"
-            placeholder={`搜尋藥物 (包含 Cefepime, Aztreonam, Table 17A/B)...`}
+            placeholder={`搜尋藥物，點選特定項目後可「編輯」臨床備註 (Pearls)...`}
             className="w-full pl-16 pr-16 py-6 bg-white rounded-full shadow-sm border border-slate-200/60 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-lg font-bold text-slate-700 outline-none transition-all placeholder:text-slate-300 placeholder:font-medium"
             value={searchTerm}
             onChange={e => {
@@ -811,19 +898,86 @@ const App = () => {
             </div>
 
             <div className={`space-y-5 border-l-2 pl-8 ${isHD ? 'border-white/5' : 'border-white/10'}`}>
-              <h4 className={`text-xs font-black uppercase tracking-widest ${isHD ? 'text-red-400' : 'text-indigo-300'}`}>
-                🔍 當前藥物專屬珠璣 (Pearl)
-              </h4>
-              <div className="space-y-3">
-                {activePearls.length > 0 ? (
-                  activePearls.map((p, i) => (
-                    <div key={i} className="flex gap-3 text-sm text-slate-300 leading-relaxed border-b border-white/5 pb-3 last:border-0">
-                      <span className={`mt-0.5 ${isHD ? 'text-red-500' : 'text-indigo-400'}`}>▶</span>
-                      {p}
+              <div className="flex items-center justify-between">
+                <h4 className={`text-xs font-black uppercase tracking-widest ${isHD ? 'text-red-400' : 'text-indigo-300'}`}>
+                  🔍 當前藥物專屬珠璣 (Pearl)
+                </h4>
+                {currentDrug && (
+                  !isEditingPearls ? (
+                    <button
+                      onClick={handleStartEdit}
+                      className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white"
+                      title="編輯備註"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleRestoreOriginal}
+                        className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-slate-400"
+                        title="恢復此藥物預設"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={handleSavePearls}
+                        className="p-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors text-white flex items-center gap-1.5"
+                        title="儲存"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold">儲存</span>
+                      </button>
+                      <button
+                        onClick={() => setIsEditingPearls(false)}
+                        className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-slate-300"
+                        title="取消"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  ))
+                  )
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {isEditingPearls ? (
+                  <div className="space-y-3">
+                    {editedPearls.map((p, i) => (
+                      <div key={i} className="group relative flex items-start gap-3 bg-white/5 p-3 rounded-xl border border-white/5 focus-within:border-indigo-500/50 transition-all">
+                        <textarea
+                          className="flex-1 bg-transparent text-sm text-slate-200 outline-none resize-none placeholder:text-slate-600 min-h-[40px]"
+                          value={p}
+                          onChange={(e) => handleUpdatePearl(i, e.target.value)}
+                          placeholder="輸入新的臨床備註..."
+                          rows={2}
+                        />
+                        <button
+                          onClick={() => handleRemovePearl(i)}
+                          className="text-slate-500 hover:text-red-400 p-1 rounded opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={handleAddPearl}
+                      className="w-full py-3 border-2 border-dashed border-white/10 rounded-xl text-xs font-bold text-slate-500 hover:border-indigo-500/50 hover:text-indigo-400 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" /> 新增備註項目
+                    </button>
+                  </div>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">請搜尋特定藥物以顯示詳細臨床備註。</p>
+                  activePearls.length > 0 ? (
+                    activePearls.map((p, i) => (
+                      <div key={i} className="flex gap-3 text-sm text-slate-300 leading-relaxed border-b border-white/5 pb-3 last:border-0">
+                        <span className={`mt-0.5 ${isHD ? 'text-red-500' : 'text-indigo-400'}`}>▶</span>
+                        {p}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">請搜尋特定藥物以顯示詳細臨床備註。</p>
+                  )
                 )}
               </div>
             </div>
