@@ -26,6 +26,7 @@ const Download = (props) => <IconBase {...props}><path d="M21 15v4a2 2 0 0 1-2 2
 const Upload = (props) => <IconBase {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></IconBase>;
 const Database = (props) => <IconBase {...props}><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5" /><path d="M3 12A9 3 0 0 0 21 12" /></IconBase>;
 const Copy = (props) => <IconBase {...props}><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></IconBase>;
+const Tag = (props) => <IconBase {...props}><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" /><line x1="7" y1="7" x2="7.01" y2="7" /></IconBase>;
 
 // --- 預設值 ---
 const DEFAULT_VALUES = {
@@ -43,7 +44,8 @@ const DRUG_DATA = [
   // --- Table 17A: 需要調整劑量的藥物 ---
   {
     id: "cefepime",
-    name: "Cefepime (Maxipime)",
+    name: "Cefepime",
+    tradeNames: ["Maxipime"],
     category: "Cephalosporin (4th Gen)",
     is17B: false,
     normal: "1–2g q8-12h",
@@ -61,6 +63,7 @@ const DRUG_DATA = [
   {
     id: "ceftazidime",
     name: "Ceftazidime",
+    tradeNames: ["Fortum"],
     category: "Cephalosporin (3rd Gen)",
     is17B: false,
     normal: "2g q8h",
@@ -73,7 +76,8 @@ const DRUG_DATA = [
   },
   {
     id: "cefmetazole",
-    name: "Cefmetazole (Zefazone)",
+    name: "Cefmetazole",
+    tradeNames: ["Zefazone"],
     category: "Cephamycin (2nd Gen)",
     is17B: false,
     normal: "1-2g q6-12h",
@@ -86,7 +90,8 @@ const DRUG_DATA = [
   },
   {
     id: "ceftaroline",
-    name: "Ceftaroline (Zinforo)",
+    name: "Ceftaroline",
+    tradeNames: ["Zinforo"],
     category: "Cephalosporin (5th Gen)",
     is17B: false,
     normal: "600mg q12h",
@@ -138,7 +143,8 @@ const DRUG_DATA = [
   },
   {
     id: "aztreonam",
-    name: "Aztreonam (Azactam)",
+    name: "Aztreonam",
+    tradeNames: ["Azactam"],
     category: "Monobactam",
     is17B: false,
     normal: "1–2g q8h",
@@ -152,6 +158,7 @@ const DRUG_DATA = [
   {
     id: "ciprofloxacin-iv",
     name: "Ciprofloxacin (IV)",
+    tradeNames: ["Cipro"],
     category: "Fluoroquinolone",
     is17B: false,
     normal: "400 mg q8-12h",
@@ -165,6 +172,7 @@ const DRUG_DATA = [
   {
     id: "acyclovir-iv",
     name: "Acyclovir (IV)",
+    tradeNames: ["Zovirax"],
     category: "Antiviral",
     is17B: false,
     normal: "5–10 mg/kg q8h",
@@ -177,7 +185,8 @@ const DRUG_DATA = [
   },
   {
     id: "amoxicillin-clavulanate",
-    name: "Amoxicillin-Clavulanate (Augmentin)",
+    name: "Amoxicillin-Clavulanate",
+    tradeNames: ["Augmentin", "Curam"],
     category: "Penicillin/BLI",
     is17B: false,
     normal: "875/125mg q12h 或 500/125mg q8h",
@@ -189,7 +198,8 @@ const DRUG_DATA = [
   },
   {
     id: "voriconazole",
-    name: "Voriconazole (Vfend)",
+    name: "Voriconazole",
+    tradeNames: ["Vfend"],
     category: "Antifungal",
     is17B: false,
     normal: "Oral: 200mg q12h / IV: 4-6 mg/kg q12h",
@@ -202,7 +212,8 @@ const DRUG_DATA = [
   },
   {
     id: "ampicillin-sulbactam",
-    name: "Ampicillin-Sulbactam (Unasyn)",
+    name: "Ampicillin-Sulbactam",
+    tradeNames: ["Unasyn"],
     category: "Penicillin/BLI",
     is17B: false,
     normal: "1.5g–3g q6h",
@@ -215,6 +226,7 @@ const DRUG_DATA = [
   {
     id: "ampicillin-sulbactam-high",
     name: "Ampicillin-Sulbactam (High Dose for CRAB)",
+    tradeNames: ["Unasyn"],
     category: "Penicillin/BLI",
     is17B: false,
     normal: "9g (6g Amp/3g Sulb) q8h",
@@ -234,7 +246,8 @@ const DRUG_DATA = [
   },
   {
     id: "meropenem",
-    name: "Meropenem (Meronem)",
+    name: "Meropenem",
+    tradeNames: ["Meronem"],
     category: "Carbapenem",
     is17B: false,
     normal: "1g q8h",
@@ -246,7 +259,8 @@ const DRUG_DATA = [
   },
   {
     id: "imipenem-cilastatin",
-    name: "Imipenem-cilastatin (Tienam)",
+    name: "Imipenem-cilastatin",
+    tradeNames: ["Tienam"],
     category: "Carbapenem",
     is17B: false,
     normal: "500mg q6h",
@@ -258,7 +272,8 @@ const DRUG_DATA = [
   },
   {
     id: "ertapenem",
-    name: "Ertapenem (Invanz)",
+    name: "Ertapenem",
+    tradeNames: ["Invanz"],
     category: "Carbapenem",
     is17B: false,
     normal: "1g q24h",
@@ -271,6 +286,7 @@ const DRUG_DATA = [
   {
     id: "gentamicin",
     name: "Gentamicin",
+    tradeNames: [],
     category: "Aminoglycoside",
     is17B: false,
     normal: "3–5 mg/kg/day",
@@ -283,6 +299,7 @@ const DRUG_DATA = [
   {
     id: "vancomycin",
     name: "Vancomycin (IV)",
+    tradeNames: ["Vancocin"],
     category: "Glycopeptide",
     is17B: false,
     normal: "15-20 mg/kg q8-12h (Loading: 20-35 mg/kg)",
@@ -300,6 +317,7 @@ const DRUG_DATA = [
   {
     id: "amikacin",
     name: "Amikacin",
+    tradeNames: [],
     category: "Aminoglycoside",
     is17B: false,
     normal: "15 mg/kg/day",
@@ -311,7 +329,8 @@ const DRUG_DATA = [
   },
   {
     id: "levofloxacin",
-    name: "Levofloxacin (Levaquin)",
+    name: "Levofloxacin",
+    tradeNames: ["Levaquin"],
     category: "Fluoroquinolone",
     is17B: false,
     normal: "500–750mg q24h",
@@ -322,7 +341,8 @@ const DRUG_DATA = [
   },
   {
     id: "flomoxef",
-    name: "Flomoxef (Flumarin)",
+    name: "Flomoxef",
+    tradeNames: ["Flumarin"],
     category: "Oxacephem",
     is17B: false,
     normal: "1–2g q12h",
@@ -335,6 +355,7 @@ const DRUG_DATA = [
   {
     id: "teicoplanin",
     name: "Teicoplanin",
+    tradeNames: ["Tardocel"],
     category: "Glycopeptide",
     is17B: false,
     normal: "6–12 mg/kg q24h",
@@ -348,6 +369,7 @@ const DRUG_DATA = [
   {
     id: "pip-tazo-non",
     name: "Piperacillin-Tazobactam (Non-PS)",
+    tradeNames: ["Tazocin", "Zosyn"],
     category: "Penicillin/BLI",
     is17B: false,
     normal: "3.375g q6h or 4.5g q8h",
@@ -359,6 +381,7 @@ const DRUG_DATA = [
   {
     id: "pip-tazo-ps",
     name: "Piperacillin-Tazobactam (PS dose)",
+    tradeNames: ["Tazocin", "Zosyn"],
     category: "Penicillin/BLI",
     is17B: false,
     normal: "3.375g q4h or 4.5g q6h",
@@ -369,6 +392,7 @@ const DRUG_DATA = [
   {
     id: "colistin",
     name: "Colistin (CMS)",
+    tradeNames: [],
     category: "Polymyxin",
     is17B: false,
     normal: "2.5–5 mg/kg/day CBA",
@@ -380,14 +404,14 @@ const DRUG_DATA = [
   },
 
   // --- Table 17B: 無需調整劑量的藥物 ---
-  { id: "azithromycin", name: "Azithromycin", category: "Macrolide", is17B: true, notes: "No adjustment needed. Standard: 500mg D1 then 250mg q24h." },
-  { id: "ceftriaxone", name: "Ceftriaxone", category: "Cephalosporin (3rd)", is17B: true, notes: "No adjustment needed. Standard: 1-2g q24h." },
-  { id: "clindamycin", name: "Clindamycin", category: "Lincosamide", is17B: true, notes: "No adjustment needed. Standard: 300-450mg PO q6-8h / 600-900mg IV q8h." },
-  { id: "doxycycline", name: "Doxycycline", category: "Tetracycline", is17B: true, notes: "No adjustment needed. Standard: 100mg q12h." },
-  { id: "tigecycline", name: "Tigecycline (Tygacil)", category: "Glycylcycline", is17B: true, notes: "No adjustment needed (Hepatic). Standard: Load 100mg, then 50mg q12h." },
-  { id: "linezolid", name: "Linezolid", category: "Oxazolidinone", is17B: true, notes: "No adjustment needed. Standard: 600mg q12h." },
-  { id: "metronidazole", name: "Metronidazole", category: "Nitroimidazole", is17B: true, notes: "No adjustment needed. Standard: 500mg q8h." },
-  { id: "moxifloxacin", name: "Moxifloxacin", category: "Fluoroquinolone", is17B: true, notes: "No adjustment needed. Standard: 400mg q24h." }
+  { id: "azithromycin", name: "Azithromycin", tradeNames: ["Zithromax"], category: "Macrolide", is17B: true, notes: "No adjustment needed. Standard: 500mg D1 then 250mg q24h." },
+  { id: "ceftriaxone", name: "Ceftriaxone", tradeNames: ["Rocephin"], category: "Cephalosporin (3rd)", is17B: true, notes: "No adjustment needed. Standard: 1-2g q24h." },
+  { id: "clindamycin", name: "Clindamycin", tradeNames: ["Dalacin"], category: "Lincosamide", is17B: true, notes: "No adjustment needed. Standard: 300-450mg PO q6-8h / 600-900mg IV q8h." },
+  { id: "doxycycline", name: "Doxycycline", tradeNames: [], category: "Tetracycline", is17B: true, notes: "No adjustment needed. Standard: 100mg q12h." },
+  { id: "tigecycline", name: "Tigecycline", tradeNames: ["Tygacil"], category: "Glycylcycline", is17B: true, notes: "No adjustment needed (Hepatic). Standard: Load 100mg, then 50mg q12h." },
+  { id: "linezolid", name: "Linezolid", tradeNames: ["Zyvox"], category: "Oxazolidinone", is17B: true, notes: "No adjustment needed. Standard: 600mg q12h." },
+  { id: "metronidazole", name: "Metronidazole", tradeNames: ["Flagyl"], category: "Nitroimidazole", is17B: true, notes: "No adjustment needed. Standard: 500mg q8h." },
+  { id: "moxifloxacin", name: "Moxifloxacin", tradeNames: ["Avelox"], category: "Fluoroquinolone", is17B: true, notes: "No adjustment needed. Standard: 400mg q24h." }
 ];
 
 const App = () => {
@@ -403,7 +427,17 @@ const App = () => {
   // --- 永續儲存與編輯狀態 ---
   const [drugs, setDrugs] = useState(() => {
     const saved = localStorage.getItem('renal_guide_drugs');
-    return saved ? JSON.parse(saved) : DRUG_DATA;
+    if (!saved) return DRUG_DATA;
+    try {
+      const parsed = JSON.parse(saved);
+      // Data Migration: Ensure tradeNames field exists
+      return parsed.map(d => ({
+        ...d,
+        tradeNames: d.tradeNames || []
+      }));
+    } catch (e) {
+      return DRUG_DATA;
+    }
   });
 
   useEffect(() => {
@@ -412,6 +446,10 @@ const App = () => {
 
   const [isEditingPearls, setIsEditingPearls] = useState(false);
   const [editedPearls, setEditedPearls] = useState([]);
+
+  // --- 商品名編輯狀態 ---
+  const [isEditingTradeNames, setIsEditingTradeNames] = useState(false);
+  const [editedTradeNames, setEditedTradeNames] = useState([]);
 
   // --- 永續資料匯出/匯入 ---
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
@@ -509,6 +547,31 @@ const App = () => {
     setIsEditingPearls(false);
   };
 
+  const handleStartEditTradeNames = () => {
+    if (!currentDrug) return;
+    setEditedTradeNames([...(currentDrug.tradeNames || [])]);
+    setIsEditingTradeNames(true);
+  };
+
+  const handleSaveTradeNames = () => {
+    if (!currentDrug) return;
+    const cleanNames = editedTradeNames.filter(tn => tn.trim() !== '');
+    const updatedDrugs = drugs.map(d => {
+      if (d.id === currentDrug.id) {
+        return { ...d, tradeNames: cleanNames };
+      }
+      return d;
+    });
+
+    localStorage.setItem('renal_guide_drugs', JSON.stringify(updatedDrugs));
+    setDrugs(updatedDrugs);
+
+    const updatedDrugMatch = updatedDrugs.find(d => d.id === currentDrug.id);
+    if (updatedDrugMatch) setSelectedDrug(updatedDrugMatch);
+
+    setIsEditingTradeNames(false);
+  };
+
   const handleRestoreOriginal = () => {
     if (!currentDrug) return;
     const originalVersion = DRUG_DATA.find(d => d.id === currentDrug.id);
@@ -568,7 +631,8 @@ const App = () => {
   const filteredDrugs = useMemo(() => {
     return drugs.filter(drug =>
       drug.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      drug.category.toLowerCase().includes(searchTerm.toLowerCase())
+      drug.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (drug.tradeNames && drug.tradeNames.some(tn => tn.toLowerCase().includes(searchTerm.toLowerCase())))
     ).sort((a, b) => a.name.localeCompare(b.name));
   }, [searchTerm, drugs]);
 
@@ -832,7 +896,7 @@ const App = () => {
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-6 h-6 transition-colors group-focus-within:text-indigo-500" strokeWidth={2.5} />
           <input
             type="text"
-            placeholder={`搜尋藥物，點選特定項目後可「編輯」臨床備註 (Pearls)...`}
+            placeholder={`搜尋藥物（學名或商品名），點擊後可「編輯」備註或增減商品名稱...`}
             className="w-full pl-16 pr-16 py-6 bg-white rounded-full shadow-sm border border-slate-200/60 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-lg font-bold text-slate-700 outline-none transition-all placeholder:text-slate-300 placeholder:font-medium"
             value={searchTerm}
             onChange={e => {
@@ -891,6 +955,28 @@ const App = () => {
                       <span className="text-[10px] font-black px-3 py-1 rounded-full bg-slate-100 text-slate-500 uppercase tracking-wider">{drug.category}</span>
                       {isHD && !drug.is17B && <span className="bg-red-400/20 text-red-600 border border-red-400/30 text-[10px] font-black px-3 py-1 rounded-full shadow-sm uppercase tracking-wider">Hemodialysis</span>}
                       {drug.is17B && <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-200 tracking-wider">TABLE 17B</span>}
+                    </div>
+
+                    {/* 商品名區塊 Trade Names */}
+                    <div className="flex flex-wrap gap-2">
+                      {drug.tradeNames && drug.tradeNames.length > 0 ? (
+                        drug.tradeNames.map((tn, idx) => (
+                          <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50/80 text-indigo-600 rounded-lg text-[11px] font-bold border border-indigo-100/50 shadow-sm">
+                            <Tag className="w-3 h-3" /> {tn}
+                          </span>
+                        ))
+                      ) : (
+                        !selectedDrug ? null : <span className="text-[11px] text-slate-400 italic">尚未設定商品名</span>
+                      )}
+                      {selectedDrug && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleStartEditTradeNames(); }}
+                          className="p-1 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border border-slate-200 flex items-center gap-1"
+                          title="增修商品名稱"
+                        >
+                          <Edit2 className="w-3 h-3" /> 增修商品名
+                        </button>
+                      )}
                     </div>
 
                     {drug.loadingDose && (
@@ -1140,6 +1226,71 @@ const App = () => {
               >
                 關閉視窗 <X className="w-3 h-3" />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 商品名編輯互動視窗 (Trade Names Modal) */}
+      {isEditingTradeNames && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsEditingTradeNames(false)}></div>
+          <div className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="p-8 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+                  <Tag className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 leading-tight">編輯商品名稱</h3>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{currentDrug?.name}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 max-h-[40vh] overflow-y-auto px-1">
+                {editedTradeNames.map((tn, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={tn}
+                      onChange={(e) => {
+                        const newNames = [...editedTradeNames];
+                        newNames[idx] = e.target.value;
+                        setEditedTradeNames(newNames);
+                      }}
+                      className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2.5 font-bold text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow"
+                      placeholder="例如: Augmentin"
+                    />
+                    <button
+                      onClick={() => setEditedTradeNames(editedTradeNames.filter((_, i) => i !== idx))}
+                      className="p-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setEditedTradeNames([...editedTradeNames, ''])}
+                  className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-xs font-bold text-slate-400 hover:border-indigo-500/50 hover:text-indigo-500 transition-all flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> 新增商品名稱
+                </button>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => setIsEditingTradeNames(false)}
+                  className="flex-1 py-3 text-sm font-black text-slate-400 hover:bg-slate-50 rounded-2xl transition-all"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleSaveTradeNames}
+                  className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+                >
+                  儲存修改
+                </button>
+              </div>
             </div>
           </div>
         </div>
