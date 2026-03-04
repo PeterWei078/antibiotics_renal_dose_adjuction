@@ -44,8 +44,8 @@ const DRUG_DATA = [
     hdNotes: "血液透析會移除大量 Cefepime。務必在透析結束後才給予當日劑量。",
     highlights: ["Neurotoxicity risk", "Pseudomonas coverage"],
     standardPearls: [
-      "腎功能不全患者若劑量過高，極易誘發神經毒性（如意識混亂、肌躍症、非抽搐性癲癇 NCSE）。",
-      "當 CrCl < 50 mL/min 時，必須延長給藥間隔至 q24h。",
+      "Cefepime 在腎衰竭患者極易引起神經毒性，務必根據 CrCl 減量。",
+      "Cefepime 調整門檻主要以 50 mL/min 為界限。",
       "對於治療綠膿桿菌 (Pseudomonas)，需確保劑量足以維持有效濃度。"
     ],
     hdPearls: ["血液透析清除率高，建議每日一次 1g，並固定於透析結束後給藥。"]
@@ -73,7 +73,7 @@ const DRUG_DATA = [
     hdDose: "1-2g after HD",
     hdNotes: "血液透析清除率高，建議於透析後給藥。",
     highlights: ["Anaerobic coverage"],
-    standardPearls: ["具有抗厭氧菌活性 (cephamycin)。"],
+    standardPearls: [],
     hdPearls: ["透析後補藥。"]
   },
   {
@@ -86,7 +86,7 @@ const DRUG_DATA = [
     hdDose: "200mg q12h (After HD)",
     hdNotes: "透析患者建議 200mg q12h，且在透析日需於透析後給藥。",
     highlights: ["MRSA coverage"],
-    standardPearls: ["針對 MRSA 有效的頭孢菌素。", "腎功能調整區間較細 (50/30/15)。"],
+    standardPearls: ["針對 MRSA 有效的頭孢菌素。"],
     hdPearls: ["透析日請於透析結束後給藥。"]
   },
   {
@@ -99,7 +99,7 @@ const DRUG_DATA = [
     hdDose: "Supplement Sulbactam after HD",
     hdNotes: "Cefoperazone 為膽道排除，無需調整；Sulbactam 為腎排除，需調整並於 HD 後補給。",
     highlights: ["Biliary excretion (Cefoperazone)", "Acinetobacter (Sulbactam)"],
-    standardPearls: ["主要調整依據為 Sulbactam 成分。"],
+    standardPearls: [],
     hdPearls: ["透析會移除 Sulbactam，建議透析後補給。"]
   },
   {
@@ -435,7 +435,11 @@ const App = () => {
 
   const activePearls = useMemo(() => {
     const pearls = [];
-    filteredDrugs.forEach(d => {
+    // 只有在「已選取特定藥物」或「搜尋結果只有一個」的情況下，才顯示專屬珠璣 (Pearl)
+    // 避免搜尋 broad term (如 "Cef") 時顯示過多不相干的備註
+    const sourceDrugs = selectedDrug ? [selectedDrug] : (filteredDrugs.length === 1 ? filteredDrugs : []);
+
+    sourceDrugs.forEach(d => {
       if (isHD) {
         if (d.hdPearls) pearls.push(...d.hdPearls);
       } else {
@@ -443,7 +447,7 @@ const App = () => {
       }
     });
     return [...new Set(pearls)];
-  }, [filteredDrugs, isHD]);
+  }, [selectedDrug, filteredDrugs, isHD]);
 
   const getDoseAdvice = (drug) => {
     if (isHD) {
@@ -799,9 +803,8 @@ const App = () => {
                   </>
                 ) : (
                   <>
-                    <li className="flex gap-3 leading-relaxed"><span className="text-indigo-400 font-bold">1.</span> Cefepime 在腎衰竭患者極易引起神經毒性，務必根據 CrCl 減量。</li>
-                    <li className="flex gap-3 leading-relaxed"><span className="text-indigo-400 font-bold">2.</span> Cefepime 調整門檻主要以 50 mL/min 為界限。</li>
-                    <li className="flex gap-3 leading-relaxed"><span className="text-indigo-400 font-bold">3.</span> Table 17B 代表藥物在任何階段通常無需調整。</li>
+                    <li className="flex gap-3 leading-relaxed"><span className="text-indigo-400 font-bold">1.</span> 當 CrCl 降低時，部分抗生素（如 Cefepime, Meropenem）需顯著調整劑量以避免毒性。</li>
+                    <li className="flex gap-3 leading-relaxed"><span className="text-indigo-400 font-bold">2.</span> Table 17B 代表藥物在任何階段通常無需調整。</li>
                   </>
                 )}
               </ul>
