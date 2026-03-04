@@ -462,7 +462,7 @@ const App = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `sanford_renal_guide_backup_${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `苗醫_antibiotics_renal_guide_backup_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -788,7 +788,7 @@ const App = () => {
               <ShieldAlert className="w-8 h-8" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-white uppercase" style={{ fontFamily: "Arial Black, impact, sans-serif" }}>Sanford Renal Guide</h1>
+              <h1 className="text-2xl font-black tracking-tight text-white uppercase" style={{ fontFamily: "Arial Black, impact, sans-serif" }}>苗醫 Antibiotics Renal Guide</h1>
               <p className="text-[11px] font-bold tracking-widest text-slate-300 uppercase mt-0.5">
                 {isHD ? '血液透析模式 (HEMODIALYSIS) 已開啟' : '標準 eGFR (CrCl) 計算模式'}
               </p>
