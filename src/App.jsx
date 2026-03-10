@@ -450,10 +450,14 @@ const App = () => {
     try {
       const parsed = JSON.parse(saved);
       // Data Migration: Ensure tradeNames field exists
-      return parsed.map(d => ({
+      const migrated = parsed.map(d => ({
         ...d,
         tradeNames: d.tradeNames || []
       }));
+      // Merge new drugs that are in DRUG_DATA but not in localStorage
+      const existingIds = new Set(migrated.map(d => d.id));
+      const newDrugs = DRUG_DATA.filter(d => !existingIds.has(d.id));
+      return [...migrated, ...newDrugs];
     } catch (e) {
       return DRUG_DATA;
     }
