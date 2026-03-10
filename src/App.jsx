@@ -411,7 +411,26 @@ const DRUG_DATA = [
   { id: "tigecycline", name: "Tigecycline", tradeNames: ["Tygacil"], category: "Glycylcycline", is17B: true, notes: "No adjustment needed (Hepatic). Standard: Load 100mg, then 50mg q12h." },
   { id: "linezolid", name: "Linezolid", tradeNames: ["Zyvox"], category: "Oxazolidinone", is17B: true, notes: "No adjustment needed. Standard: 600mg q12h." },
   { id: "metronidazole", name: "Metronidazole", tradeNames: ["Flagyl"], category: "Nitroimidazole", is17B: true, notes: "No adjustment needed. Standard: 500mg q8h." },
-  { id: "moxifloxacin", name: "Moxifloxacin", tradeNames: ["Avelox"], category: "Fluoroquinolone", is17B: true, notes: "No adjustment needed. Standard: 400mg q24h." }
+  { id: "moxifloxacin", name: "Moxifloxacin", tradeNames: ["Avelox"], category: "Fluoroquinolone", is17B: true, notes: "No adjustment needed. Standard: 400mg q24h." },
+  {
+    id: "micafungin",
+    name: "Micafungin",
+    tradeNames: [],
+    category: "Echinocandin",
+    is17B: true,
+    notes: "No adjustment needed. Standard: 50-150mg IV q24h.",
+    standardPearls: [
+      "無需依腎功能或肝功能調整劑量。嚴重感染可考慮增至 200–300 mg/天。",
+      "體重 ≤50 kg 者，建議每日不高於 6 mg/kg。",
+      "靜脈輸注：≤75mg 輸注 ≥30分鐘；>75mg 輸注 ≥1小時。配製需避光且避免用力搖晃。",
+      "常見不良反應為肝功能異常。需留意過敏性休克、溶血性貧血等少見嚴重反應。",
+      "無法良好穿透 CSF、眼睛或尿路，若此部位感染應考慮其他藥物。"
+    ],
+    hdPearls: [
+      "蛋白結合率極高 (>99%)，幾乎不被透析清除。",
+      "血液透析、腹膜透析皆無需調整劑量，且透析後無需補充。"
+    ]
+  }
 ];
 
 const App = () => {
