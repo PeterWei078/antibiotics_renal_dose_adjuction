@@ -36,7 +36,9 @@ const DEFAULT_VALUES = {
   scr: '1.2',
   gender: 'male',
   isHD: false,
-  searchTerm: ''
+  searchTerm: '',
+  inputMode: 'calculate', // 'calculate' 或 'manual'
+  manualCrcl: ''
 };
 
 // --- 數據定義 (整合 Table 17A & 17B & 新增藥物) ---
@@ -440,6 +442,8 @@ const App = () => {
   const [scr, setScr] = useState(DEFAULT_VALUES.scr);
   const [gender, setGender] = useState(DEFAULT_VALUES.gender);
   const [isHD, setIsHD] = useState(DEFAULT_VALUES.isHD);
+  const [inputMode, setInputMode] = useState(DEFAULT_VALUES.inputMode);
+  const [manualCrcl, setManualCrcl] = useState(DEFAULT_VALUES.manualCrcl);
   const [searchTerm, setSearchTerm] = useState(DEFAULT_VALUES.searchTerm);
   const [selectedDrug, setSelectedDrug] = useState(null);
 
@@ -624,11 +628,23 @@ const App = () => {
     setScr(DEFAULT_VALUES.scr);
     setGender(DEFAULT_VALUES.gender);
     setIsHD(false);
+    setInputMode(DEFAULT_VALUES.inputMode);
+    setManualCrcl(DEFAULT_VALUES.manualCrcl);
     setSearchTerm('');
     setSelectedDrug(null);
   };
 
   const calculation = useMemo(() => {
+    if (inputMode === 'manual') {
+      const mc = parseFloat(manualCrcl) || 0;
+      return {
+        crcl: Math.round(mc * 10) / 10,
+        ibw: 0,
+        isOverweight: false,
+        calcWeight: 0
+      };
+    }
+
     const a = parseFloat(age) || 0;
     const w = parseFloat(weight) || 0;
     const h = parseFloat(height) || 0;
@@ -649,7 +665,7 @@ const App = () => {
       isOverweight,
       calcWeight: Math.round(calcWeight * 10) / 10
     };
-  }, [age, weight, height, scr, gender]);
+  }, [age, weight, height, scr, gender, inputMode, manualCrcl]);
 
   const filteredDrugs = useMemo(() => {
     return drugs.filter(drug =>
@@ -859,36 +875,73 @@ const App = () => {
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         {/* 輸入與控制面版 Input & Control Panel */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60 grid grid-cols-2 gap-x-10 gap-y-6 relative">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Gender 性別</label>
-                <div className="flex bg-slate-50 p-1.5 rounded-2xl">
-                  <button onClick={() => setGender('male')} className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all ${gender === 'male' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}>男</button>
-                  <button onClick={() => setGender('female')} className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all ${gender === 'female' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}>女</button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Age 年齡</label>
-                <input type="number" disabled={isHD} value={age} onChange={e => setAge(e.target.value)} placeholder="65" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 font-bold text-base text-slate-700 disabled:opacity-50 disabled:bg-slate-100 focus:ring-2 focus:ring-indigo-500 transition-shadow outline-none" />
-              </div>
+          <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-200/60 overflow-hidden flex flex-col">
+            {/* 模式切換 Tabs */}
+            <div className="flex border-b border-slate-100 bg-slate-50/50">
+              <button
+                onClick={() => setInputMode('calculate')}
+                className={`flex-1 py-4 text-sm font-black transition-all ${inputMode === 'calculate' ? 'text-indigo-700 bg-white border-b-2 border-indigo-600 shadow-sm' : 'text-slate-400 hover:bg-slate-50'}`}
+              >
+                📝 計算模式 (Age/Ht/Wt)
+              </button>
+              <button
+                onClick={() => setInputMode('manual')}
+                className={`flex-1 py-4 text-sm font-black transition-all ${inputMode === 'manual' ? 'text-indigo-700 bg-white border-b-2 border-indigo-600 shadow-sm' : 'text-slate-400 hover:bg-slate-50'}`}
+              >
+                ⚡️ 手動輸入 CrCl
+              </button>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Ht (cm)</label>
-                  <input type="number" disabled={isHD} value={height} onChange={e => setHeight(e.target.value)} placeholder="170" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 font-bold text-base text-slate-700 disabled:opacity-50 disabled:bg-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" />
+            <div className="p-8 pb-10">
+              {inputMode === 'manual' ? (
+                /* 手動輸入模式 */
+                <div className="flex flex-col items-center justify-center py-6">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider mb-4">直接輸入 CrCl (mL/min) 或 eGFR</label>
+                  <input
+                    type="number"
+                    disabled={isHD}
+                    value={manualCrcl}
+                    onChange={e => setManualCrcl(e.target.value)}
+                    placeholder="輸入數值"
+                    className="w-1/2 bg-indigo-50/50 text-indigo-700 border-none rounded-2xl px-6 py-4 text-3xl font-black text-center disabled:opacity-50 disabled:bg-slate-50 outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all placeholder:text-indigo-300"
+                  />
+                  <p className="text-sm text-slate-500 font-bold mt-6">輸入數值將直接做為劑量調整依據</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Wt (kg)</label>
-                  <input type="number" disabled={isHD} value={weight} onChange={e => setWeight(e.target.value)} placeholder="70" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 font-bold text-base text-slate-700 disabled:opacity-50 disabled:bg-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" />
+              ) : (
+                /* 傳統計算模式 */
+                <div className="grid grid-cols-2 gap-x-10 gap-y-6 relative">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Gender 性別</label>
+                      <div className="flex bg-slate-50 p-1.5 rounded-2xl">
+                        <button onClick={() => setGender('male')} className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all ${gender === 'male' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}>男</button>
+                        <button onClick={() => setGender('female')} className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all ${gender === 'female' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}>女</button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Age 年齡</label>
+                      <input type="number" disabled={isHD} value={age} onChange={e => setAge(e.target.value)} placeholder="65" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 font-bold text-base text-slate-700 disabled:opacity-50 disabled:bg-slate-100 focus:ring-2 focus:ring-indigo-500 transition-shadow outline-none" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Ht (cm)</label>
+                        <input type="number" disabled={isHD} value={height} onChange={e => setHeight(e.target.value)} placeholder="170" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 font-bold text-base text-slate-700 disabled:opacity-50 disabled:bg-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Wt (kg)</label>
+                        <input type="number" disabled={isHD} value={weight} onChange={e => setWeight(e.target.value)} placeholder="70" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3 font-bold text-base text-slate-700 disabled:opacity-50 disabled:bg-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Scr 肌酸酐 (mg/dL)</label>
+                      <input type="number" disabled={isHD} value={scr} onChange={e => setScr(e.target.value)} placeholder="1.2" className="w-full bg-indigo-50/50 text-indigo-700 border-none rounded-2xl px-5 py-3 text-xl font-black disabled:opacity-50 disabled:bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Scr 肌酸酐 (mg/dL)</label>
-                <input type="number" disabled={isHD} value={scr} onChange={e => setScr(e.target.value)} placeholder="1.2" className="w-full bg-indigo-50/50 text-indigo-700 border-none rounded-2xl px-5 py-3 text-xl font-black disabled:opacity-50 disabled:bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
-              </div>
+              )}
             </div>
           </div>
 
